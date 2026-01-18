@@ -80,22 +80,22 @@ jobs:
           
       - name: Install dependencies
         run: |
-          cd flutter_app
+          cd ./flutter_app
           flutter pub get
           
       - name: Verify installation
         run: |
-          cd flutter_app
+          cd ./flutter_app
           flutter doctor -v
           
       - name: Build APK
         run: |
-          cd flutter_app
+          cd ./flutter_app
           flutter build apk --release
           
       - name: Build App Bundle
         run: |
-          cd flutter_app
+          cd ./flutter_app
           flutter build appbundle --release
           
       - name: Upload APK artifact
