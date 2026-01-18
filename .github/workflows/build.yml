@@ -5,13 +5,17 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   build-android:
-    name: Build Android APK
+    name: Build Android
     runs-on: ubuntu-latest
-    
+    # This sets the folder for all 'run' steps in this job
+    defaults:
+      run:
+        working-directory: ./flutter_app
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,84 +25,27 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          
-      - name: Ensure Android cmdline-tools are installed
-        shell: bash
-        run: |
-          set -euo pipefail
-          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
-          if [ -x "${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" ]; then
-            echo "Android cmdline-tools already present at ${SDK_ROOT}/cmdline-tools/latest"
-            exit 0
-          fi
-          echo "Installing Android command-line tools into ${SDK_ROOT}..."
-          mkdir -p "${SDK_ROOT}/cmdline-tools"
-          cd /tmp
-          curl -fsSL -o commandlinetools.zip "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
-          unzip -q commandlinetools.zip
-          # Remove existing latest if it exists
-          rm -rf "${SDK_ROOT}/cmdline-tools/latest"
-          mv cmdline-tools "${SDK_ROOT}/cmdline-tools/latest"
-          chmod -R a+rX "${SDK_ROOT}/cmdline-tools/latest"
+          cache: 'gradle' # Speeds up subsequent builds
 
-      - name: Ensure Android SDK components
-        shell: bash
-        run: |
-          set -euo pipefail
-          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
-          SDKMANAGER="${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "${SDKMANAGER}" ]; then
-            SDKMANAGER="$(command -v sdkmanager || true)"
-          fi
-          if [ -z "${SDKMANAGER}" ]; then
-            echo "ERROR: sdkmanager not found even after attempting to install cmdline-tools. Listing ${SDK_ROOT}:"
-            ls -la "${SDK_ROOT}" || true
-            exit 1
-          fi
-          export PATH="${SDK_ROOT}/platform-tools:${SDK_ROOT}/cmdline-tools/latest/bin:$PATH"
-          set +o pipefail
-          yes | "${SDKMANAGER}" --sdk_root="${SDK_ROOT}" \
-            "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.2" \
-            "cmdline-tools;latest" || true
-          set -o pipefail
-
-      - name: Accept Android SDK licenses
-        shell: bash
-        run: |
-          set -euo pipefail
-          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
-          export PATH="${SDK_ROOT}/cmdline-tools/latest/bin:$PATH"
-          set +o pipefail
-          yes | sdkmanager --sdk_root="${SDK_ROOT}" --licenses || true
-          set -o pipefail
-          
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-          
+          cache: true # Speeds up builds
+
       - name: Install dependencies
-        run: |
-          cd ./flutter_app
-          flutter pub get
-          
-      - name: Verify installation
-        run: |
-          cd ./flutter_app
-          flutter doctor -v
-          
+        run: flutter pub get
+
+      # The runner already has the SDK; this just ensures licenses are signed
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Build APK
-        run: |
-          cd ./flutter_app
-          flutter build apk --release
+        run: flutter build apk --release
           
       - name: Build App Bundle
-        run: |
-          cd ./flutter_app
-          flutter build appbundle --release
+        run: flutter build appbundle --release
           
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -115,9 +62,12 @@ jobs:
           retention-days: 30
 
   build-ios:
-    name: Build iOS (macOS only)
+    name: Build iOS
     runs-on: macos-latest
-    if: false  # Disabled by default, set to true if you have Apple Developer account
+    if: false # Kept as false per your original code
+    defaults:
+      run:
+        working-directory: ./flutter_app
     
     steps:
       - name: Checkout repository
@@ -130,14 +80,10 @@ jobs:
           channel: 'stable'
           
       - name: Install dependencies
-        run: |
-          cd flutter_app
-          flutter pub get
+        run: flutter pub get
           
       - name: Build iOS
-        run: |
-          cd flutter_app
-          flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign
           
       - name: Upload iOS artifact
         uses: actions/upload-artifact@v4
