@@ -5,26 +5,23 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
-    env:
-      APP_DIR: cashflow-ai/flutter_app
-      ANDROID_SDK_ROOT: $HOME/android-sdk
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-
+          
       - name: Ensure Android cmdline-tools are installed
         shell: bash
         run: |
@@ -39,6 +36,8 @@ jobs:
           cd /tmp
           curl -fsSL -o commandlinetools.zip "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
           unzip -q commandlinetools.zip
+          # Remove existing latest if it exists
+          rm -rf "${SDK_ROOT}/cmdline-tools/latest"
           mv cmdline-tools "${SDK_ROOT}/cmdline-tools/latest"
           chmod -R a+rX "${SDK_ROOT}/cmdline-tools/latest"
 
@@ -74,57 +73,75 @@ jobs:
           set +o pipefail
           yes | sdkmanager --sdk_root="${SDK_ROOT}" --licenses || true
           set -o pipefail
-
+          
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            ${{ env.APP_DIR }}/.dart_tool
-          # Use the literal path in hashFiles (cannot expand env there), adjust if your path differs
-          key: ${{ runner.os }}-pub-${{ hashFiles('cashflow-ai/flutter_app/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
+          
       - name: Install dependencies
-        shell: bash
         run: |
-          set -euo pipefail
-          cd "${APP_DIR}"
-          # Timeout after 5 minutes and retry once
-          timeout 300 flutter pub get || (echo "flutter pub get failed; retrying..."; flutter pub get)
-
+          cd ./flutter_app
+          flutter pub get
+          
       - name: Verify installation
         run: |
-          cd "${APP_DIR}"
+          cd ./flutter_app
           flutter doctor -v
-
+          
       - name: Build APK
         run: |
-          cd "${APP_DIR}"
+          cd ./flutter_app
           flutter build apk --release
-
+          
       - name: Build App Bundle
         run: |
-          cd "${APP_DIR}"
+          cd ./flutter_app
           flutter build appbundle --release
-
+          
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: ${{ env.APP_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
-
+          
       - name: Upload App Bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-appbundle
-          path: ${{ env.APP_DIR }}/build/app/outputs/bundle/release/app-release.aab
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  build-ios:
+    name: Build iOS (macOS only)
+    runs-on: macos-latest
+    if: false  # Disabled by default, set to true if you have Apple Developer account
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: |
+          cd flutter_app
+          flutter pub get
+          
+      - name: Build iOS
+        run: |
+          cd flutter_app
+          flutter build ios --release --no-codesign
+          
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ios
+          path: flutter_app/build/ios/iphoneos/Runner.app
           retention-days: 30
