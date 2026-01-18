@@ -1,94 +1,145 @@
 name: Build Flutter App
+
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
-  build:
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
-
+    
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache Pub packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Setup Java 17
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.16.0'
-          channel: 'stable'
-
-      - name: Diagnose Android SDK layout (debug)
-        run: |
-          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}"
-          ls -la "${ANDROID_SDK_ROOT}" || true
-
-      - name: Ensure Android SDK components (cmdline-tools, platform-tools, build-tools, platform)
+          
+      - name: Ensure Android cmdline-tools are installed
+        shell: bash
         run: |
           set -euo pipefail
-          SDK_ROOT="${ANDROID_SDK_ROOT}"
-          # Prefer sdkmanager from SDK_ROOT/cmdline-tools/latest/bin, fall back to any available sdkmanager in PATH
-          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$SDKMANAGER" ]; then
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+          if [ -x "${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "Android cmdline-tools already present at ${SDK_ROOT}/cmdline-tools/latest"
+            exit 0
+          fi
+          echo "Installing Android command-line tools into ${SDK_ROOT}..."
+          mkdir -p "${SDK_ROOT}/cmdline-tools"
+          cd /tmp
+          curl -fsSL -o commandlinetools.zip "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
+          unzip -q commandlinetools.zip
+          mv cmdline-tools "${SDK_ROOT}/cmdline-tools/latest"
+          chmod -R a+rX "${SDK_ROOT}/cmdline-tools/latest"
+
+      - name: Ensure Android SDK components
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+          SDKMANAGER="${SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "${SDKMANAGER}" ]; then
             SDKMANAGER="$(command -v sdkmanager || true)"
           fi
-          if [ -z "$SDKMANAGER" ]; then
-            echo "ERROR: sdkmanager not found. Android SDK cmdline-tools may be missing. Listing $SDK_ROOT:"
-            ls -la "$SDK_ROOT" || true
+          if [ -z "${SDKMANAGER}" ]; then
+            echo "ERROR: sdkmanager not found even after attempting to install cmdline-tools. Listing ${SDK_ROOT}:"
+            ls -la "${SDK_ROOT}" || true
             exit 1
           fi
-          export PATH="$SDK_ROOT/platform-tools:$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-          # Install a minimal consistent set. Adjust android-33 and build-tools version to match your project's compileSdkVersion if needed.
-          yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2" "cmdline-tools;latest"
-        shell: bash
+          export PATH="${SDK_ROOT}/platform-tools:${SDK_ROOT}/cmdline-tools/latest/bin:$PATH"
+          set +o pipefail
+          yes | "${SDKMANAGER}" --sdk_root="${SDK_ROOT}" \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2" \
+            "cmdline-tools;latest" || true
+          set -o pipefail
 
       - name: Accept Android SDK licenses
+        shell: bash
         run: |
           set -euo pipefail
-          export PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${PATH}"
-          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses || true
-        shell: bash
-
-      - name: Install Dependencies
-        working-directory: cashflow-ai/flutter_app
-        run: flutter pub get
-
-      - name: Run flutter doctor (verbose)
-        run: flutter doctor -v
-
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+          export PATH="${SDK_ROOT}/cmdline-tools/latest/bin:$PATH"
+          set +o pipefail
+          yes | sdkmanager --sdk_root="${SDK_ROOT}" --licenses || true
+          set -o pipefail
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: |
+          cd flutter_app
+          flutter pub get
+          
+      - name: Verify installation
+        run: |
+          cd flutter_app
+          flutter doctor -v
+          
       - name: Build APK
-        working-directory: cashflow-ai/flutter_app
-        run: flutter build apk --release -v
-
-      - name: Upload Artifact
+        run: |
+          cd flutter_app
+          flutter build apk --release
+          
+      - name: Build App Bundle
+        run: |
+          cd flutter_app
+          flutter build appbundle --release
+          
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cashflow-ai-apk
-          path: cashflow-ai/flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          name: release-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-appbundle
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  build-ios:
+    name: Build iOS (macOS only)
+    runs-on: macos-latest
+    if: false  # Disabled by default, set to true if you have Apple Developer account
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: |
+          cd flutter_app
+          flutter pub get
+          
+      - name: Build iOS
+        run: |
+          cd flutter_app
+          flutter build ios --release --no-codesign
+          
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ios
+          path: flutter_app/build/ios/iphoneos/Runner.app
+          retention-days: 30
