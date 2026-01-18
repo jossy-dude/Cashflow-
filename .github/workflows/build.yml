@@ -25,7 +25,7 @@ jobs:
         # Note: If your code is in a subfolder, use: cd flutter_app && flutter build apk --release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cashflow-ai-apk
           path: build/app/outputs/flutter-apk/app-release.apk
