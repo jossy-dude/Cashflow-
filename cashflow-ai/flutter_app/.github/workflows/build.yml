@@ -1,4 +1,4 @@
-name: Build Flutter APK
+name: Build Flutter APK (Diagnostic Workflow)
 
 on:
   push:
@@ -10,35 +10,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java w/ Gradle Cache
+      - name: 2. 🕵️‍♂️ Diagnose File Structure
+        id: diagnose
+        run: |
+          echo "Listing all files in the workspace to verify paths..."
+          ls -R
+          echo "--- End of File Listing ---"
+
+      - name: 3. Setup Java w/ Specific Gradle Cache
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           cache: 'gradle'
-          # These paths must be relative to the repository root.
-          cache-dependency-path: |
-            cashflow-ai/flutter_app/android/**/*.gradle*
-            cashflow-ai/flutter_app/android/gradle/wrapper/gradle-wrapper.properties
+          # Instead of a broad pattern, we target one specific, essential file.
+          # This is more robust. The path must be relative to the repository root.
+          cache-dependency-path: 'cashflow-ai/flutter_app/android/build.gradle'
 
-      - name: Setup Flutter
+      - name: 4. Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Build Flutter App
+      - name: 5. Build Flutter App
+        working-directory: ./cashflow-ai/flutter_app
         run: |
-          echo "Changing directory to cashflow-ai/flutter_app"
-          cd cashflow-ai/flutter_app
-          echo "Running flutter pub get..."
           flutter pub get
-          echo "Running flutter build..."
           flutter build apk --release
 
-      - name: Upload APK Artifact
+      - name: 6. Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
           name: app-release.apk
