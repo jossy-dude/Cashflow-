@@ -1,4 +1,4 @@
-name: Build Flutter APK (Diagnostic Workflow)
+name: Build Flutter APK (with On-the-Fly Upgrade)
 
 on:
   push:
@@ -13,29 +13,31 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 2. 🕵️‍♂️ Diagnose File Structure
-        id: diagnose
-        run: |
-          echo "Listing all files in the workspace to verify paths..."
-          ls -R
-          echo "--- End of File Listing ---"
-
-      - name: 3. Setup Java w/ Specific Gradle Cache
+      - name: 2. Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: 'gradle'
-          # Instead of a broad pattern, we target one specific, essential file.
-          # This is more robust. The path must be relative to the repository root.
-          cache-dependency-path: 'cashflow-ai/flutter_app/android/build.gradle'
 
-      - name: 4. Setup Flutter
+      - name: 3. Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: 5. Build Flutter App
+      - name: 4. ✨ Perform Project Transplant
+        run: |
+          echo "Creating dummy project to get modern Android build files..."
+          flutter create dummy_project
+          
+          echo "Removing old Android project folder..."
+          rm -rf ./cashflow-ai/flutter_app/android
+          
+          echo "Transplanting modern Android project folder..."
+          mv ./dummy_project/android ./cashflow-ai/flutter_app/android
+          
+          echo "Upgrade complete."
+
+      - name: 5. Build Upgraded Flutter App
         working-directory: ./cashflow-ai/flutter_app
         run: |
           flutter pub get
