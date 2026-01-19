@@ -103,8 +103,8 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildSyncStatus(BuildContext context) {
-    return Consumer<SyncProvider>(
-      builder: (context, syncProvider, _) {
+    return Consumer2<SyncProvider, TransactionProvider>(
+      builder: (context, syncProvider, transactionProvider, _) {
         return Container(
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
@@ -161,16 +161,33 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               ElevatedButton.icon(
-                onPressed: () async {
+                onPressed: syncProvider.isSyncing ? null : () async {
                   HapticFeedbackUtil.mediumImpact();
-                  final provider = Provider.of<TransactionProvider>(context, listen: false);
-                  final syncProvider = Provider.of<SyncProvider>(context, listen: false);
-                  syncProvider.setSyncing(true);
-                  await provider.syncEmails();
-                  syncProvider.updateLastSyncTime();
-                  syncProvider.setSyncing(false);
+                  try {
+                    syncProvider.setSyncing(true);
+                    await transactionProvider.syncEmails();
+
+                    if (transactionProvider.error != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Sync failed: ${transactionProvider.error}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } else {
+                      syncProvider.updateLastSyncTime();
+                    }
+                  } finally {
+                    syncProvider.setSyncing(false);
+                  }
                 },
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: syncProvider.isSyncing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.refresh, size: 18),
                 label: const Text('Refresh'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
@@ -280,7 +297,7 @@ class DashboardScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.account_balance_wallet),
@@ -439,7 +456,7 @@ class DashboardScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: percentage,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isPaid ? AppTheme.primaryColor : color,
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/sync_provider.dart';
-import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_card.dart';
 import '../utils/haptic_feedback.dart';
@@ -378,7 +377,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       child: Text(
                         'Every ${syncProvider.syncFrequency} mins',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,

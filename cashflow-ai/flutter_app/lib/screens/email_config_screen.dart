@@ -313,14 +313,14 @@ class _EmailConfigScreenState extends State<EmailConfigScreen> {
                       HapticFeedbackUtil.lightImpact();
                       _showAppPasswordInfo();
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(
                           Icons.info_outline,
                           size: 16,
                           color: AppTheme.primaryColor,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         Text(
                           'Why do I need an App Password?',
                           style: TextStyle(
@@ -376,7 +376,7 @@ class _EmailConfigScreenState extends State<EmailConfigScreen> {
                     : const Icon(Icons.save),
                 label: Text(_isSaving ? 'Saving...' : 'Save Configuration'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   foregroundColor: Theme.of(context).colorScheme.onSurface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),

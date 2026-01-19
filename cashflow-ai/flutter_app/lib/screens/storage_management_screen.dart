@@ -92,8 +92,8 @@ class _StorageManagementScreenState extends State<StorageManagementScreen> {
         await _loadStorageInfo();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Cache cleared successfully'),
+            const SnackBar(
+              content: Text('Cache cleared successfully'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.green,
             ),
@@ -209,7 +209,7 @@ class _StorageManagementScreenState extends State<StorageManagementScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(

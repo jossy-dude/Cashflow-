@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../providers/transaction_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_card.dart';
-import '../utils/haptic_feedback.dart';
 
 class DataVisualizerScreen extends StatelessWidget {
   const DataVisualizerScreen({super.key});
@@ -107,7 +106,7 @@ class DataVisualizerScreen extends StatelessWidget {
                 ),
                 child: Text(
                   '${transactions.length} transactions',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.primaryColor,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -489,8 +488,8 @@ class DataVisualizerScreen extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: percentage / 100,
                       minHeight: 12,
-                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                      valueColor: AlwaysStoppedAnimation<Color>(
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
                         AppTheme.primaryColor,
                       ),
                     ),

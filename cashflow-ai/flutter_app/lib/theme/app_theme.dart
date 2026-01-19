@@ -28,16 +28,14 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundLight,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: primaryColor,
         secondary: primaryColor,
         surface: surfaceLight,
-        background: backgroundLight,
         error: Colors.red,
-        onPrimary: const Color(0xFF11221C),
-        onSecondary: const Color(0xFF11221C),
+        onPrimary: Color(0xFF11221C),
+        onSecondary: Color(0xFF11221C),
         onSurface: Colors.black87,
-        onBackground: Colors.black87,
         onError: Colors.white,
       ),
       cardTheme: CardTheme(
@@ -47,11 +45,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: backgroundLight,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-        titleTextStyle: const TextStyle(
+        iconTheme: IconThemeData(color: Colors.black87),
+        titleTextStyle: TextStyle(
           color: Colors.black87,
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -82,16 +80,14 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundDark,
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: primaryColor,
         secondary: primaryColor,
         surface: surfaceDark,
-        background: backgroundDark,
         error: Colors.red,
-        onPrimary: const Color(0xFF11221C),
-        onSecondary: const Color(0xFF11221C),
+        onPrimary: Color(0xFF11221C),
+        onSecondary: Color(0xFF11221C),
         onSurface: Colors.white,
-        onBackground: Colors.white,
         onError: Colors.white,
       ),
       cardTheme: CardTheme(
@@ -101,11 +97,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: backgroundDark,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,

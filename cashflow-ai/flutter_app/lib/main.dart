@@ -1,7 +1,6 @@
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'utils/haptic_feedback.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/review_inbox_screen.dart';
@@ -13,7 +12,6 @@ import 'providers/transaction_provider.dart';
 import 'providers/sync_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/database_service.dart';
-import 'utils/haptic_feedback.dart';
 import 'widgets/smooth_scroll_behavior.dart';
 
 void main() async {
@@ -280,7 +278,7 @@ class _ManualEntrySheetState extends State<ManualEntrySheet> {
                         const SizedBox(height: 16),
                         // Account
                         DropdownButtonFormField<String>(
-                          value: _selectedAccount,
+                          initialValue: _selectedAccount,
                           decoration: const InputDecoration(
                             labelText: 'Account',
                             prefixIcon: Icon(Icons.account_balance),
@@ -300,7 +298,7 @@ class _ManualEntrySheetState extends State<ManualEntrySheet> {
                         const SizedBox(height: 16),
                         // Transaction Type
                         DropdownButtonFormField<String>(
-                          value: _transactionType,
+                          initialValue: _transactionType,
                           decoration: const InputDecoration(
                             labelText: 'Type',
                             prefixIcon: Icon(Icons.swap_horiz),
@@ -318,7 +316,7 @@ class _ManualEntrySheetState extends State<ManualEntrySheet> {
                         const SizedBox(height: 16),
                         // Category
                         DropdownButtonFormField<String>(
-                          value: _selectedCategory,
+                          initialValue: _selectedCategory,
                           decoration: const InputDecoration(
                             labelText: 'Category',
                             prefixIcon: Icon(Icons.category),

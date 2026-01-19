@@ -143,7 +143,7 @@ class ParserIntelligenceScreen extends StatelessWidget {
             width: double.infinity,
             height: 100,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 48, color: AppTheme.primaryColor),
@@ -205,7 +205,7 @@ class ParserIntelligenceScreen extends StatelessWidget {
                 color: AppTheme.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Text(
+              child: const Text(
                 'UTF-8 Encoded',
                 style: TextStyle(
                   fontSize: 10,
@@ -262,11 +262,11 @@ class ParserIntelligenceScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.green.withOpacity(0.2)),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.verified, size: 14, color: Colors.green),
-                  const SizedBox(width: 4),
+                  Icon(Icons.verified, size: 14, color: Colors.green),
+                  SizedBox(width: 4),
                   Text(
                     '98.4% Confidence',
                     style: TextStyle(
@@ -325,7 +325,7 @@ class ParserIntelligenceScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Theme.of(context).dividerColor,

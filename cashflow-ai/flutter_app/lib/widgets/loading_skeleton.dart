@@ -16,7 +16,7 @@ class LoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Theme.of(context).colorScheme.surfaceVariant,
+      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       highlightColor: Theme.of(context).colorScheme.surface,
       child: Container(
         width: width,
@@ -42,10 +42,10 @@ class TransactionSkeleton extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const LoadingSkeleton(width: 48, height: 48, borderRadius: BorderRadius.all(Radius.circular(12))),
-          const SizedBox(width: 16),
+          LoadingSkeleton(width: 48, height: 48, borderRadius: BorderRadius.all(Radius.circular(12))),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,18 +53,18 @@ class TransactionSkeleton extends StatelessWidget {
                 LoadingSkeleton(
                   width: double.infinity,
                   height: 16,
-                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 LoadingSkeleton(
                   width: 100,
                   height: 12,
-                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
               ],
             ),
           ),
-          const LoadingSkeleton(width: 60, height: 20, borderRadius: BorderRadius.all(Radius.circular(4))),
+          LoadingSkeleton(width: 60, height: 20, borderRadius: BorderRadius.all(Radius.circular(4))),
         ],
       ),
     );

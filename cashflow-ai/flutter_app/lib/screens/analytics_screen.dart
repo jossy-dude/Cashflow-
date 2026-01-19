@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/transaction_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/animated_card.dart';
 import '../utils/haptic_feedback.dart';
 import 'data_visualizer_screen.dart';
 
@@ -104,7 +103,7 @@ class AnalyticsScreen extends StatelessWidget {
                         color: AppTheme.primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
+                      child: const Text(
                         '+12% vs LY',
                         style: TextStyle(
                           color: AppTheme.primaryColor,
@@ -132,7 +131,7 @@ class AnalyticsScreen extends StatelessWidget {
                   Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -219,8 +218,8 @@ class AnalyticsScreen extends StatelessWidget {
               height: 200,
               child: LineChart(
                 LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
@@ -235,7 +234,7 @@ class AnalyticsScreen extends StatelessWidget {
                       isCurved: true,
                       color: AppTheme.primaryColor,
                       barWidth: 3,
-                      dotData: FlDotData(show: false),
+                      dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
                         color: AppTheme.primaryColor.withOpacity(0.1),

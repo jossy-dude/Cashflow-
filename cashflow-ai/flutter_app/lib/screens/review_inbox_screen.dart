@@ -1,4 +1,3 @@
-import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/transaction_provider.dart';
@@ -8,7 +7,6 @@ import '../widgets/animated_card.dart';
 import '../widgets/loading_skeleton.dart';
 import '../widgets/empty_state.dart';
 import '../utils/haptic_feedback.dart';
-import 'transaction_detail_screen.dart';
 
 class ReviewInboxScreen extends StatelessWidget {
   const ReviewInboxScreen({super.key});
@@ -38,7 +36,7 @@ class ReviewInboxScreen extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.warning,
                           size: 16,
                           color: AppTheme.primaryColor,
@@ -46,7 +44,7 @@ class ReviewInboxScreen extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           '$pendingCount Pending Review',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
@@ -134,7 +132,7 @@ class ReviewInboxScreen extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).dividerColor,
@@ -370,7 +368,7 @@ class ReviewInboxScreen extends StatelessWidget {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: 'Category'),
-              value: transaction.category,
+              initialValue: transaction.category,
               items: ['Food', 'Transport', 'Rent', 'Shopping', 'Other']
                   .map((cat) => DropdownMenuItem(
                         value: cat.toLowerCase(),
