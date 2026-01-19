@@ -11,27 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java (No Cache)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: gradle
-          cache-dependency-path: |
-            cashflow-ai/flutter_app/android/**/*.gradle*
-            cashflow-ai/flutter_app/android/**/gradle-wrapper.properties
-            cashflow-ai/flutter_app/android/gradle/*.versions.toml
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-
+      
       - name: Build Flutter App
+        working-directory: ./cashflow-ai/flutter_app
         run: |
-          cd cashflow-ai/flutter_app
           flutter pub get
           flutter build apk --release
 
